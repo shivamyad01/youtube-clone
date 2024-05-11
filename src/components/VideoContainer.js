@@ -1,23 +1,40 @@
-import React from 'react';
 
-const VideoContainer = ({ videoIds }) => {
-    
+
+
+import React, { useState, useEffect } from 'react';
+import VideoCard from './VideoCard';
+
+const VideoContainer = () => {
+  const [videos, setVideos] = useState([]);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const response = await fetch('https://www.googleapis.com/youtube/v3/videos?key=AIzaSyDkGKmCcK_3zLbZkfZn4REDQpldpMVLLpM&part=snippet&chart=mostPopular&maxResults=50&regionCode=IN');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        const fetchedVideos = data.items.map(item => ({
+          id: item.id,
+          title: item.snippet.title,
+          thumbnail: item.snippet.thumbnails.default.url
+        }));
+        
+        setVideos(fetchedVideos);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchVideos();
+  }, []);
+
   return (
-    <div className="flex flex-wrap">
-      {videoIds.map((videoId, index) => (
-        <div key={index} className="w-1/4 p-2">
-          <div className="aspect-w-16 aspect-h-9  ">
-            <iframe
-              title={`YouTube Video ${index + 1}`}
-              src={`https://www.youtube.com/embed/${videoId}`}
-              frameBorder="0"
-              allowFullScreen
-              className="w-full h-full"
-            ></iframe>
-          </div>
-          
-        </div>
-      ))}
+    <div>
+
+
+      <VideoCard videoDetails={videos}/>
     </div>
   );
 };
